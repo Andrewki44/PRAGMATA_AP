@@ -1,14 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyName>PRAGMATA_AP</AssemblyName>
+    <AssemblyName>PRAGMATA_AP</AssemblyName>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" />
+    <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1">
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -36,32 +39,46 @@
     <Reference Include="application">
       <HintPath>lib\REFramework.NET.application.dll</HintPath>
     </Reference>
+    <Reference Include="_System.Private.CoreLib">
+      <HintPath>lib\REFramework.NET._System.Private.CoreLib.dll</HintPath>
+    </Reference>
     <Reference Include="viacore">
       <HintPath>lib\REFramework.NET.viacore.dll</HintPath>
     </Reference>
   </ItemGroup>
 
 	<PropertyGroup>
-		<BuildDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)</BuildDir>
+		<BuildDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\$(TargetFramework)</BuildDir>
 		<REframeworkPath>D:\Steam\steamapps\common\PRAGMATA\reframework\plugins\managed</REframeworkPath>
+		<APPackage>Archipelago.MultiClient.Net.dll</APPackage>
+		<Newtonsoft>Newtonsoft.Json.dll</Newtonsoft>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	  <IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+	  <IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PluginFiles Include="$(BuildDir)\$(AssemblyName).dll" />
+		<DebugFiles Include="$(BuildDir)\$(AssemblyName).pdb" />
+		<DependencyFiles Include="$(BuildDir)\$(APPackage); $(BuildDir)\$(Newtonsoft)" />
+	</ItemGroup>
+
 	<Target Name="CopyToPublish" AfterTargets="Build">
-		<ItemGroup>
-			<PluginFiles Include="$(BuildDir)\$(AssemblyName).dll" />
-			<DebugFiles Include="$(BuildDir)\$(AssemblyName).pdb" />
-		</ItemGroup>
 		<Copy SourceFiles="@(PluginFiles)" DestinationFiles="$(PublishDir)$(AssemblyName).dll" />
+		<Copy SourceFiles="@(DependencyFiles)" DestinationFiles="$(PublishDir)dependencies\$(APPackage); $(PublishDir)dependencies\$(Newtonsoft)" />
 		<Copy Condition="$(Configuration) == 'Debug'" SourceFiles="@(DebugFiles)" DestinationFiles="$(PublishDir)$(AssemblyName).pdb" />
 	</Target>
 
 	<Target Name="CopyToGame" AfterTargets="Build" DependsOnTargets="CopyToPublish">
-		<ItemGroup>
-			<PublishPluginFiles Include="$(PublishDir)\$(AssemblyName).dll" />
-			<PublishDebugFiles Include="$(PublishDir)\$(AssemblyName).pdb" />
-		</ItemGroup>
-		<Copy SourceFiles="@(PublishPluginFiles)" DestinationFiles="$(REframeworkPath)\$(AssemblyName).dll" />
-		<Copy Condition="$(Configuration) == 'Debug'" SourceFiles="@(PublishDebugFiles)" DestinationFiles="$(REframeworkPath)\$(AssemblyName).pdb" />
+		<Copy SourceFiles="@(PluginFiles)" DestinationFiles="$(REframeworkPath)\$(AssemblyName).dll" />
+		<Copy SourceFiles="@(DependencyFiles)" DestinationFiles="$(REframeworkPath)\dependencies\$(APPackage); $(REframeworkPath)\dependencies\$(Newtonsoft)" ContinueOnError="true" Retries="0" />
+		<Copy Condition="$(Configuration) == 'Debug'" SourceFiles="@(DebugFiles)" DestinationFiles="$(REframeworkPath)\$(AssemblyName).pdb" />
 	</Target>
 
 </Project>
