@@ -1,7 +1,4 @@
 ﻿using Hexa.NET.ImGui;
-using REFrameworkNET;
-using REFrameworkNET.Attributes;
-using REFrameworkNET.Callbacks;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
@@ -36,7 +33,7 @@ public static partial class Archipelago {
 
         private static int fontSize = -1;
 
-        [Callback(typeof(ImGuiRender), CallbackType.Pre)]
+        //[Callback(typeof(ImGuiRender), CallbackType.Pre)]
         public static void OnImGuiRender() {
             if (fontSize == -1)
                 fontSize = (int)ImGui.GetFontSize();

@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,11 +40,11 @@
     <Reference Include="application">
       <HintPath>lib\REFramework.NET.application.dll</HintPath>
     </Reference>
-    <Reference Include="_System.Private.CoreLib">
-      <HintPath>lib\REFramework.NET._System.Private.CoreLib.dll</HintPath>
-    </Reference>
     <Reference Include="viacore">
       <HintPath>lib\REFramework.NET.viacore.dll</HintPath>
+    </Reference>
+    <Reference Include="_System.Private.CoreLib">
+      <HintPath>lib\REFramework.NET._System.Private.CoreLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -52,7 +53,6 @@
 		<REframeworkPath>D:\Steam\steamapps\common\PRAGMATA\reframework\plugins\managed</REframeworkPath>
 		<APPackage>Archipelago.MultiClient.Net.dll</APPackage>
 		<Newtonsoft>Newtonsoft.Json.dll</Newtonsoft>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

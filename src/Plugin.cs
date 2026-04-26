@@ -1,62 +1,107 @@
 ﻿using REFrameworkNET;
 using REFrameworkNET.Attributes;
 using System;
-using System.Collections.Generic;
 
 namespace PRAGMATA_AP;
 
 public class Plugin {
+    //static app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+    //static app.ItemManager itemManager = API.GetManagedSingletonT<app.ItemManager>();
+
+
     [PluginEntryPoint]
     public static void Main() {
         API.LogInfo("~~~~ AP Loaded ~~~~");
+
+        TDB tdb = API.GetTDB();
+
+        app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+        app.ItemManager itemManager = API.GetManagedSingletonT<app.ItemManager>();
+
+        _System.UInt32_Array1D itemIDs = inventoryManager.getItemIDs();
+
+        for (int i = 0; i < itemIDs.Length; i++) {
+            uint itemID = itemIDs.Get(i);
+            string message = $"{itemID} || ";
+
+            app.TextMessageData textData = itemManager.getNameData(itemID);
+
+            if (textData != null)
+                message += textData.getMessage();
+
+            API.LogInfo($"{message}");
+        }
     }
 
-    [MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.onAcquireItem), MethodHookType.Pre)]
-    public static PreHookResult PreOnRequiredItem(Span<ulong> args) {
-        uint itemID = (uint)args[2];
-        string message = "";
+    [MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.acquireItem), MethodHookType.Pre)]
+    public static PreHookResult PreAcquireItem(Span<ulong> args) {
+        app.InventoryManager inventoryManager = ManagedObject.ToManagedObject(args[1]).As<app.InventoryManager>();
+        app.AcquisitionItemInfo acquisitionItemInfo = ManagedObject.ToManagedObject(args[2]).As<app.AcquisitionItemInfo>();
+        app.InventoryManager.AcquireItemOptions acquireItemOptions = ManagedObject.ToManagedObject(args[3]).As<app.InventoryManager.AcquireItemOptions>();
 
-        if (itemIDs.ContainsKey(itemID)) {
-            message = $"{itemID} || {itemIDs[itemID]}";
-        } else {
-            message = $"{itemID} || UNKNOWN, PLEASE DOCUMENT";
+        string message = $"[{DateTime.Now.ToString("hh:mm:ss tt")}]    ~~ InventoryManager.acquireItem ~~";
+
+        app.ItemQuantityInfo itemQuantityInfo = acquisitionItemInfo.ItemQuantityInfo;
+        app.WeaponItemInfo weaponInfo = acquisitionItemInfo.WeaponInfo;
+        app.PerkItemInfo perkInfo = acquisitionItemInfo.PerkInfo;
+
+        if (itemQuantityInfo != null) {
+            message += "\n    ItemInfo ~~ ";
+            message += $"ID: {itemQuantityInfo.ID} || Qty: {itemQuantityInfo.Quantity}";
         }
 
-        API.LogInfo("~~~~ onAcquireItem ~~~~");
-        API.LogInfo($"[{DateTime.Now.ToString("hh:mm:ss tt")}]    {message}");
+        if (weaponInfo != null) {
+            message += "\n    WeaponInfo ~~ ";
+            message += $"ID: {weaponInfo.ID} || RemainingBullerNum: {weaponInfo.RemainingBulletNum}";
+        }
+
+        if (perkInfo != null) {
+            message += "\n    PerkInfo ~~ ";
+            message += $"ItemID: {perkInfo.ItemID} || PerkID: {perkInfo.PerkID} || Count: {perkInfo.Count}";
+        }
+
+        API.LogInfo(message);
 
         return PreHookResult.Continue;
     }
 
-    public static Dictionary<uint, string> itemIDs = new(){
-        {2227368435, "Lunafilament"},
-        {663376744, "Lunafilament (1)"},
-        {2074518467, "Lunafilament (S)"},
-        {2870192522, "Refill Repair Cartridge"},
-        {1984889503, "Upgrade Materials??"},
-        {187746965, "Upgrade Materials??"},
-        {1305591762, "Repair Kit"},
-        {163051433, "Shockwave Gun"},
-        {860467045, "Charge Piercer"},
-        {3320209826, "Homing Missiles"},
-        {3613536690, "Photon Laser"},
-        {2600790876, "Sticky Bombs"},
-        {2427932221, "Stasis Net"},
-        {2620883957, "Riot Blaster"},
-        {1504483110, "Decoy Generator"},
-        {2629333698, "Impact Barrier"},
-        {2943986455, "Decode"},
-        {2943986455, "Multihack"},
-        {1852445624, "Lunafilament (M)"},
-        {1179591319, "Lunafilament (L or XL)"},
-        {179699175, "Lunafilament (XL or L)"},
-        {2429803748, "Red Gate Key"},
-        {701076331, "Cabin Coin"},
-        {1123299822, "REM (Skateboard)"},
-    };
+    [MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.onAcquireItem), MethodHookType.Pre)]
+    public static PreHookResult PreOnAcquireItas(Span<ulong> args) {
+        // Method Arguments");
+        uint itemID = (uint)args[2];
+        app.WeaponItemInfo? weapon = ManagedObject.ToManagedObject(args[3])?.As<app.WeaponItemInfo>();
+        app.PerkItemInfo? perk = ManagedObject.ToManagedObject(args[4])?.As<app.PerkItemInfo>();
+        int unknown = (int)args[5];
+        //app.InventoryManager.AcquireItemOptions acquireItemOptions = ManagedObject.ToManagedObject(args[6]).As<app.InventoryManager.AcquireItemOptions>();
+        //API.LogInfo("Check6");
+
+        string message = $"{itemID} || ";
+
+        // Get ItemManager Item Name
+        app.ItemManager itemManager = API.GetManagedSingletonT<app.ItemManager>();
+        app.TextMessageData textData = itemManager.getNameData(itemID);
+        if (textData != null)
+            message += $"ItemManager Name: {textData.getMessage()}";
+
+        // Get Weapon Info
+        if (weapon != null)
+            message += $"\n    Weapon ID: {weapon.ID} || Remaining Bullet Num: {weapon.RemainingBulletNum}";
+
+        // Get Perk Info
+        if (perk != null)
+            message += $"\n    Perk Item ID: {perk.ItemID} || Perk ID: {perk.PerkID} || Perk Count: {perk.Count}";
+
+        if (unknown != 0)
+            message += $"\n    args[5]: {unknown}";
+
+        API.LogInfo($"[{DateTime.Now.ToString("hh:mm:ss tt")}]    ~~ InventoryManager.onAcquireItem ~~");
+        API.LogInfo($"    {message}");
+
+        return PreHookResult.Continue;
+    }
 
     [PluginExitPoint]
-    public static async void OnUnload() {
+    public static void OnUnload() {
         if (Archipelago.isConnected)
             Archipelago.Disconnect().Wait();
 
