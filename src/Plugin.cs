@@ -1,13 +1,13 @@
-﻿using REFrameworkNET;
+﻿using PRAGMATA.AP;
+using REFrameworkNET;
 using REFrameworkNET.Attributes;
 using System;
 
-namespace PRAGMATA_AP;
+namespace PRAGMATA;
 
 public class Plugin {
     //static app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
     //static app.ItemManager itemManager = API.GetManagedSingletonT<app.ItemManager>();
-
 
     [PluginEntryPoint]
     public static void Main() {
@@ -102,8 +102,8 @@ public class Plugin {
 
     [PluginExitPoint]
     public static void OnUnload() {
-        if (Archipelago.isConnected)
-            Archipelago.Disconnect().Wait();
+        if (Client.isConnected)
+            Client.Disconnect().Wait();
 
         //ImGui.End();
         API.LogInfo("C# plugin unloaded.");

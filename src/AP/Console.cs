@@ -4,9 +4,9 @@ using System.Numerics;
 using System.Threading;
 using Color = Archipelago.MultiClient.Net.Models.Color;
 
-namespace PRAGMATA_AP;
+namespace PRAGMATA.AP;
 
-public static partial class Archipelago {
+public static partial class Client {
     public static class Console {
         private const  ImGuiKey _consoleKey = ImGuiKey.F8;
         private static bool     _enabled    = false;

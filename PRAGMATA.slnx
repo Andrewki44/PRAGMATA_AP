@@ -5,7 +5,7 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Project Path="PRAGMATA_AP.csproj">
+  <Project Path="PRAGMATA.csproj">
     <Platform Project="x64" />
   </Project>
 </Solution>

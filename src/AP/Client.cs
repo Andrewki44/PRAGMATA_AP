@@ -12,9 +12,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PRAGMATA_AP;
+namespace PRAGMATA.AP;
 
-public static partial class Archipelago {
+public static partial class Client {
     public  static Lock                clientLock = new();
     public  static ArchipelagoSession? currentSession;
     public  static string?             currentServer;
