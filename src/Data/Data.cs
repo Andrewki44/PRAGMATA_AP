@@ -10,7 +10,7 @@ public static class PragmataData {
     public static Dictionary<uint, uint> remItemDict = new () {
         { 0x00, 0x566662D0 }, // Globe
         { 0x01, 0xA1EB20D9 }, // Crayons
-        { 0x02, 0x00000000 }, // CRT TV
+        { 0x02, 0x00       }, // CRT TV
         { 0x03, 0xB7D37CBE }, // Slide
         { 0x04, 0x753111BD }, // Balloons
         { 0x05, 0x5EDADED9 }, // Basketball
@@ -18,12 +18,12 @@ public static class PragmataData {
         { 0x07, 0x42F431EE }, // Skateboard
         { 0x08, 0x74559B70 }, // Flowers
         { 0x09, 0x209419B0 }, // Swing
-        { 0x10, 0xECACA4B6 }, // Campfire
-        { 0x11, 0xCD142FA6 }, // Bug Net
-        { 0x12, 0xA7EC621D }, // Tent
-        { 0x13, 0x3C33AE96 }, // Parasol
-        { 0x14, 0x625CB4A9 }, // Water Gun
-        { 0x15, 0xBAF964A3 }, // Sandcastle
+        { 0x0A, 0xECACA4B6 }, // Campfire
+        { 0x0B, 0xCD142FA6 }, // Bug Net
+        { 0x0C, 0xA7EC621D }, // Tent
+        { 0x0D, 0x3C33AE96 }, // Parasol
+        { 0x0E, 0x625CB4A9 }, // Water Gun
+        { 0x0F, 0xBAF964A3 }, // Sandcastle
     };
 
     public static Dictionary<uint, uint> trainingDataItemDict = new () {
@@ -46,11 +46,11 @@ public static class PragmataData {
         { 0x07, 0x4205FC43 }, // Lim Cannon
         { 0x08, 0x90B74E3D }, // Stasis Net
         { 0x09, 0x9C3783F5 }, // Riot Blaster
-        { 0x10, 0x9B04EB5C }, // Sticky Bombs
-        { 0x11, 0xBDBDEDC7 }, // Code Generator
-        { 0x12, 0xFF2C68E6 }, // Hacking Mines
-        { 0x13, 0x59AC9726 }, // Decoy Generator
-        { 0x14, 0x9CB872C2 }, // Impact Barrier
-        { 0x15, 0x2A898B55 }, // Drone Hive
+        { 0x0A, 0x9B04EB5C }, // Sticky Bombs
+        { 0x0B, 0xBDBDEDC7 }, // Code Generator
+        { 0x0C, 0xFF2C68E6 }, // Hacking Mines
+        { 0x0D, 0x59AC9726 }, // Decoy Generator
+        { 0x0E, 0x9CB872C2 }, // Impact Barrier
+        { 0x0F, 0x2A898B55 }, // Drone Hive
     };
 }
