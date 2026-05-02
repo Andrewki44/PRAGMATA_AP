@@ -1,4 +1,7 @@
 ﻿using Hexa.NET.ImGui;
+using REFrameworkNET;
+using REFrameworkNET.Attributes;
+using REFrameworkNET.Callbacks;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
@@ -33,7 +36,7 @@ public static partial class Client {
 
         private static int fontSize = -1;
 
-        //[Callback(typeof(ImGuiRender), CallbackType.Pre)]
+        [Callback(typeof(ImGuiRender), CallbackType.Pre)]
         public static void OnImGuiRender() {
             if (fontSize == -1)
                 fontSize = (int)ImGui.GetFontSize();
@@ -61,6 +64,13 @@ public static partial class Client {
 
                         ImGui.EndTabItem();
                     }
+#if DEBUG
+                    if (ImGui.BeginTabItem("Debug###Archipelago.Console.TabBar.Debug")) {
+                        RenderDebug();
+
+                        ImGui.EndTabItem();
+                    }
+#endif
                     ImGui.EndTabBar();
                 }
             }
@@ -155,6 +165,133 @@ public static partial class Client {
                     // Client command
                 }
                 clientInput = "";
+            }
+        }
+
+        private static string inputLunafilament = "";
+        private static string inputUpgradeComponents = "";
+        private static string inputPureLunum = "";
+        private static string inputCabinCoin = "";
+        private static string inputCustomItemID = "";
+        private static string inputCustomWeaponID = "";
+        private static string inputCustomPerkItemID = "";
+        private static string inputCustomPerkPerkID = "";
+        private static string inputCustomQty = "";
+        private static void RenderDebug() {
+            if (ImGui.Button("Send###Lunafilament")) {
+                if (int.TryParse(inputLunafilament, out int lunafilament)) {
+                    app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+                    app.InventoryManager.AcquireItemOptions options = app.InventoryManager.AcquireItemOptions.REFType.CreateInstance(0).As<app.InventoryManager.AcquireItemOptions>();
+
+                    ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.Int32)", [2227368435, lunafilament]);
+                    app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                    inventoryManager.acquireItem(item, options);
+                }
+            }
+            ImGui.SameLine();
+            ImGui.InputText("Lunafilament", ref inputLunafilament, 5);
+
+            if (ImGui.Button("Send###UpgradeComponent")) {
+                if (int.TryParse(inputUpgradeComponents, out int upgradeComponents)) {
+                    app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+                    app.InventoryManager.AcquireItemOptions options = app.InventoryManager.AcquireItemOptions.REFType.CreateInstance(0).As<app.InventoryManager.AcquireItemOptions>();
+
+                    ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.Int32)", [187746965, upgradeComponents]);
+                    app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                    inventoryManager.acquireItem(item, options);
+                }
+            }
+            ImGui.SameLine();
+            ImGui.InputText("Upgrade Components", ref inputUpgradeComponents, 5);
+
+            if (ImGui.Button("Send###PureLunum")) {
+                if (int.TryParse(inputPureLunum, out int pureLunum)) {
+                    app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+                    app.InventoryManager.AcquireItemOptions options = app.InventoryManager.AcquireItemOptions.REFType.CreateInstance(0).As<app.InventoryManager.AcquireItemOptions>();
+
+                    ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.Int32)", [2107318115, pureLunum]);
+                    app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                    inventoryManager.acquireItem(item, options);
+                }
+            }
+            ImGui.SameLine();
+            ImGui.InputText("Pure Lunum", ref inputPureLunum, 5);
+
+            if (ImGui.Button("Send###CabinCoin")) {
+                if (int.TryParse(inputCabinCoin, out int cabinCoin)) {
+                    app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+                    app.InventoryManager.AcquireItemOptions options = app.InventoryManager.AcquireItemOptions.REFType.CreateInstance(0).As<app.InventoryManager.AcquireItemOptions>();
+
+                    ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.Int32)", [701076331, cabinCoin]);
+                    app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                    inventoryManager.acquireItem(item, options);
+                }
+            }
+            ImGui.SameLine();
+            ImGui.InputText("Cabin Coin", ref inputCabinCoin, 5);
+
+
+            ImGui.NewLine();
+            ImGui.InputText("Custom Item ID", ref inputCustomItemID, 20);
+            ImGui.InputText("Custom Weapon ID", ref inputCustomWeaponID, 20);
+            ImGui.InputText("Custom Perk Item ID", ref inputCustomPerkItemID, 20);
+            ImGui.InputText("Custom Perk Perk ID", ref inputCustomPerkPerkID, 20);
+            if (ImGui.Button("Send###Custom")) {
+                if (int.TryParse(inputCustomQty, out int customQty)) {
+                    app.InventoryManager inventoryManager = API.GetManagedSingletonT<app.InventoryManager>();
+                    app.InventoryManager.AcquireItemOptions options = app.InventoryManager.AcquireItemOptions.REFType.CreateInstance(0).As<app.InventoryManager.AcquireItemOptions>();
+
+                    if (int.TryParse(inputCustomItemID, out int customItemID)) {
+                        ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                        obj.Call(".ctor(System.UInt32, System.Int32)", [customItemID, customQty]);
+                        app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                        inventoryManager.acquireItem(item, options);
+                    }
+
+                    if (int.TryParse(inputCustomWeaponID, out int customWeaponID)) {
+                        ManagedObject weaponObj = app.WeaponItemInfo.REFType.CreateInstance(1);
+                        weaponObj.Call(".ctor(System.UInt32, System.Int32)", [customWeaponID, customQty]);
+                        app.WeaponItemInfo weapon = weaponObj.As<app.WeaponItemInfo>();
+
+                        //ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                        //obj.Call(".ctor(app.WeaponItemInfo)", [weapon]);
+                        //app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                        inventoryManager.acquireWeaponItem(weapon, null, options);
+                    }
+
+                    if (int.TryParse(inputCustomPerkItemID, out int customPerkItemID) && int.TryParse(inputCustomPerkPerkID, out int customPerkPerkID)) {
+                        ManagedObject perkObj = app.PerkItemInfo.REFType.CreateInstance(1);
+                        perkObj.Call(".ctor(System.UInt32, System.UInt32, System.Int32)", [customPerkItemID, customPerkPerkID, customQty]);
+                        app.PerkItemInfo perk = perkObj.As<app.PerkItemInfo>();
+
+                        //ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                        //obj.Call(".ctor(app.PerkItemInfo)", [perk]);
+                        //app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                        inventoryManager.acquirePerk(perk, options);
+                    }
+                }
+            }
+            ImGui.SameLine();
+            ImGui.InputText("Custom Qty", ref inputCustomQty, 5);
+
+
+
+
+            // Message Testing
+            ImGui.NewLine();
+            if (ImGui.Button("Test Message###TestMessage")) {
+
             }
         }
 

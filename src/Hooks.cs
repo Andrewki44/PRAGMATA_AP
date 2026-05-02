@@ -1,0 +1,102 @@
+﻿using REFrameworkNET;
+using REFrameworkNET.Attributes;
+using System;
+
+namespace PRAGMATA {
+    public partial class Plugin {
+        //[MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.acquireItem), MethodHookType.Pre)]
+        public static PreHookResult PreAcquireItem(Span<ulong> args) {
+            app.InventoryManager inventoryManager = ManagedObject.ToManagedObject(args[1]).As<app.InventoryManager>();
+            app.AcquisitionItemInfo acquisitionItemInfo = ManagedObject.ToManagedObject(args[2]).As<app.AcquisitionItemInfo>();
+            app.InventoryManager.AcquireItemOptions acquireItemOptions = ManagedObject.ToManagedObject(args[3]).As<app.InventoryManager.AcquireItemOptions>();
+
+            string message = $"[{DateTime.Now.ToString("hh:mm:ss tt")}]    ~~ InventoryManager.acquireItem ~~";
+
+            app.ItemQuantityInfo itemQuantityInfo = acquisitionItemInfo.ItemQuantityInfo;
+            app.WeaponItemInfo weaponInfo = acquisitionItemInfo.WeaponInfo;
+            app.PerkItemInfo perkInfo = acquisitionItemInfo.PerkInfo;
+
+            if (itemQuantityInfo != null) {
+                message += "\n    ItemInfo ~~ ";
+                message += $"ID: {itemQuantityInfo.ID} || Qty: {itemQuantityInfo.Quantity}";
+            }
+
+            if (weaponInfo != null) {
+                message += "\n    WeaponInfo ~~ ";
+                message += $"ID: {weaponInfo.ID} || RemainingBullerNum: {weaponInfo.RemainingBulletNum}";
+            }
+
+            if (perkInfo != null) {
+                message += "\n    PerkInfo ~~ ";
+                message += $"ItemID: {perkInfo.ItemID} || PerkID: {perkInfo.PerkID} || Count: {perkInfo.Count}";
+            }
+
+            API.LogInfo(message);
+
+            return PreHookResult.Continue;
+        }
+
+        //[MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.onAcquireItem), MethodHookType.Pre)]
+        public static PreHookResult PreOnAcquireItas(Span<ulong> args) {
+            // Method Arguments");
+            uint itemID = (uint)args[2];
+            app.WeaponItemInfo? weapon = ManagedObject.ToManagedObject(args[3])?.As<app.WeaponItemInfo>();
+            app.PerkItemInfo? perk = ManagedObject.ToManagedObject(args[4])?.As<app.PerkItemInfo>();
+            int qty = (int)args[5];
+            //app.InventoryManager.AcquireItemOptions acquireItemOptions = ManagedObject.ToManagedObject(args[6]).As<app.InventoryManager.AcquireItemOptions>();
+            //API.LogInfo("Check6");
+
+            string message = $"{itemID} || ";
+
+            // Get ItemManager Item Name
+            app.ItemManager itemManager = API.GetManagedSingletonT<app.ItemManager>();
+            app.TextMessageData textData = itemManager.getNameData(itemID);
+            if (textData != null)
+                message += $"ItemManager Name: {textData.getMessage()}";
+
+            // Get Weapon Info
+            if (weapon != null)
+                message += $"\n    Weapon ID: {weapon.ID} || Remaining Bullet Num: {weapon.RemainingBulletNum}";
+
+            // Get Perk Info
+            if (perk != null)
+                message += $"\n    Perk Item ID: {perk.ItemID} || Perk ID: {perk.PerkID} || Perk Count: {perk.Count}";
+
+            if (qty != 0)
+                message += $"\n    Qty: {qty}";
+
+            API.LogInfo($"[{DateTime.Now.ToString("hh:mm:ss tt")}]    ~~ InventoryManager.onAcquireItem ~~");
+            API.LogInfo($"    {message}");
+
+            return PreHookResult.Continue;
+        }
+
+        [MethodHook(typeof(app.sm72_035_10PropDriver), nameof(app.sm72_035_10PropDriver.onTriggerProcessEvent), MethodHookType.Pre)]
+        public static PreHookResult PreOnFilamentContainerProcessEvent(Span<ulong> args) {
+            app.sm72_035_10PropDriver sm72 = ManagedObject.ToManagedObject(args[1]).As<app.sm72_035_10PropDriver>();
+            via.GameObject sm72Obj = sm72.GameObject;
+            via.vec3 sm72Pos = sm72Obj.Transform.Position;
+
+            API.LogInfo($"~~ sm72_035_10 Container Opened ~~");
+            API.LogInfo($"X: {sm72Pos.x} || Y: {sm72Pos.y} || Z: {sm72Pos.z}");
+
+            return PreHookResult.Continue;
+        }
+
+        [MethodHook(typeof(app.DropItemContainerObject), nameof(app.DropItemContainerObject.acquireItems), MethodHookType.Pre)]
+        public static PreHookResult PreOnContainerAcquireItem(Span<ulong> args) {
+            app.DropItemContainerObject container = ManagedObject.ToManagedObject(args[1]).As<app.DropItemContainerObject>();
+            app.AcquisitionItemInfo containerItem = container._ContainerHandle.getFirstAcquisitionItem();
+
+            if (container._ContainerHandle._Item.ItemID == 0x764F029F) {
+                via.GameObject containerObj = container.GameObject;
+                via.vec3 containerPos = containerObj.Transform.Position;
+
+                API.LogInfo($"~~ Upgrade Material Picked Up ~~");
+                API.LogInfo($"X: {containerPos.x} || Y: {containerPos.y} || Z: {containerPos.z}");
+            }
+
+            return PreHookResult.Continue;
+        }
+    }
+}

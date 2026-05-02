@@ -6,6 +6,8 @@ using Archipelago.MultiClient.Net.MessageLog.Parts;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 using REFrameworkNET;
+using REFrameworkNET.Attributes;
+using REFrameworkNET.Callbacks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,7 @@ public static partial class Client {
     public  static Lock                clientLock = new();
     public  static ArchipelagoSession? currentSession;
     public  static string?             currentServer;
+    public  static int                 receivedItems = 0;
     public  static bool                local_locations_updated = false;
     public  static bool                remote_locations_updated = false;
     public  static string?             seedID = null;
@@ -146,6 +149,28 @@ public static partial class Client {
         lock (clientLock) {
             if (isConnected) {
                 currentSession!.Socket.SendPacketAsync(new SayPacket { Text = message });
+            }
+        }
+    }
+
+    [Callback(typeof(UpdateBehavior), CallbackType.Pre)]
+    public static void onUpdate() {
+        //app.CharacterManager characterManager = API.GetManagedSingletonT<app.CharacterManager>();
+        //app.PlayerHandle playerHandle = characterManager.getPlayerHandle();
+        //via.vec3 position = playerHandle.getCharacterControllerCenterPosition();
+        //API.LogInfo($"Player Position | x:{position.x} -- y:{position.y} -- z:{position.z}");
+
+        lock (clientLock) {
+            if (!isConnected) {
+                return;
+            }
+            if (currentSession!.Items.AllItemsReceived.Count > receivedItems) {
+                API.LogInfo("New items received");
+                foreach (ItemInfo item in currentSession.Items.AllItemsReceived.Skip(receivedItems)) {
+                    API.LogInfo($"received_item: {item.ItemName}");
+                    Plugin.ObtainItem((uint)item.ItemId);
+                    receivedItems++;
+                }
             }
         }
     }
