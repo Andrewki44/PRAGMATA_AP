@@ -2,11 +2,15 @@
 
 namespace PRAGMATA.Data;
 
-public static class PragmataData {
-    public const uint weaponItemOffset       = 0x0000;
-    public const uint remItemOffset          = 0x3000;
-    public const uint currencyOffset         = 0x4000;
-    public const uint trainingDataItemOffset = 0x8000;
+public static class PragmataItemData {
+    public enum PragmataLocationType : uint {
+        Weapon      = 0x0000,
+        REM         = 0x3000,
+        Currency    = 0x4000,
+        Training    = 0x8000,
+        Mod         = 0x8000,
+        Upgrade     = 0xA000,
+    }
 
     public static Dictionary<uint, uint> weaponItemDict = new () {
         { 0x00, 0x2E3AE9C9 }, // Grip Gun
@@ -46,7 +50,7 @@ public static class PragmataData {
         { 0x0F, 0xBAF964A3 }, // Sandcastle
     };
 
-    public static Dictionary<uint, (uint, int)> currencyItemDict = new Dictionary<uint, (uint, int)>() {
+    public static Dictionary<uint, (uint, int)> currencyItemDict = new () {
         { 0x00, (0x84C2F1F3, 100) }, // Lunafilament
         { 0x01, (0xB30CA95,    2) }, // Upgrade Component
         { 0x02, (0x7D9B1F63,   1) }, // Pure Lunum
@@ -60,5 +64,21 @@ public static class PragmataData {
         { 0x03, 0xB4FC23E3 }, // Nexus Tower
         { 0x04, 0x7086454E }, // Research Sector
         { 0x05, 0xDF53740D }, // Lunafilament Lab
+    };
+
+    public static Dictionary<uint, uint> upgradeItemDict = new () {
+        { 0x00, 0xEADCDE72 },
+        { 0x01, 0x73216782 }
+    };
+}
+
+public static class PragmataLocationData {
+    public const uint modOffset = 0x8000;
+    public enum PragmataLocationType : uint {
+        Mod = 0x8000,
+    }
+
+    public static Dictionary<uint, (long, string)> modLocationDict = new Dictionary<uint, (long, string)>() {
+        { 0x3979013A, (0, "Mod: Hardened Suit") },
     };
 }

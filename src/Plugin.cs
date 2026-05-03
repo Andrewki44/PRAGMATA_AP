@@ -4,6 +4,7 @@ using PRAGMATA.Data;
 using REFrameworkNET;
 using REFrameworkNET.Attributes;
 using System.Numerics;
+using System.Reflection;
 
 namespace PRAGMATA;
 
@@ -11,6 +12,14 @@ public partial class Plugin {
     [PluginEntryPoint]
     public static void Main() {
         API.LogInfo("~~~~ AP Loaded ~~~~");
+
+        API.LogInfo(Assembly.GetExecutingAssembly().Location);
+
+        //app.FigureDataHolder figureManager = API.GetManagedSingletonT<app.FigureDataHolder>();
+        //IList<app.FigureDescriptionUserData> figureList = figureManager.FigureDescriptionList;
+        //foreach (var figure in figureList) {
+        //    API.LogInfo($"Figure: {figure.DefaultText.FigureNameText.getMessage()} || {figure.DefaultText.DescriptionText.getMessage()}");
+        //}
 
         //app.MenuManager menuManager = API.GetManagedSingletonT<app.MenuManager>();
         //ValueTuple<uint, uint> currentMenu = (ValueTuple<uint, uint>)menuManager.currentMenu();
@@ -128,7 +137,7 @@ public partial class Plugin {
             case 0x0:   // Escape Hatches & Missions
                 break;
             case 0x1:
-                if (PragmataData.weaponItemDict.TryGetValue(itemId, out uint weaponId)) {
+                if (PragmataItemData.weaponItemDict.TryGetValue(itemId, out uint weaponId)) {
                     ManagedObject weaponObj = app.WeaponItemInfo.REFType.CreateInstance(1);
                     weaponObj.Call(".ctor(System.UInt32, System.Int32)", [weaponId, amount]);
                     app.WeaponItemInfo weapon = weaponObj.As<app.WeaponItemInfo>();
@@ -137,7 +146,7 @@ public partial class Plugin {
                 }
                 break;
             case 0x3:   // REM Items
-                if (PragmataData.remItemDict.TryGetValue(itemId, out uint remId)) {
+                if (PragmataItemData.remItemDict.TryGetValue(itemId, out uint remId)) {
                     ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
                     obj.Call(".ctor(System.UInt32, System.Int32)", [remId, amount]);
                     app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
@@ -146,11 +155,21 @@ public partial class Plugin {
                 }
                 break;
             case 0x4:   // Currency Items
-                if (PragmataData.currencyItemDict.TryGetValue(itemId, out (uint currencyId, int amount) itemInfo)) {
+                if (PragmataItemData.currencyItemDict.TryGetValue(itemId, out (uint currencyId, int amount) itemInfo)) {
                     ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
                     obj.Call(".ctor(System.UInt32, System.Int32)", [itemInfo.currencyId, itemInfo.amount]);
                     app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
 
+                    inventoryManager.acquireItem(item, null);
+                }
+                break;
+            case 0xA:
+                if (PragmataItemData.upgradeItemDict.TryGetValue(itemId, out uint upgradeId)) {
+                    ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.Int32)", [upgradeId, amount]);
+                    app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
+
+                    //inventoryManager.acquireItem(item, null);
                     inventoryManager.acquireItem(item, null);
                 }
                 break;

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static PRAGMATA.Data.PragmataLocationData;
 
 namespace PRAGMATA.AP;
 
@@ -151,6 +152,21 @@ public static partial class Client {
                 currentSession!.Socket.SendPacketAsync(new SayPacket { Text = message });
             }
         }
+    }
+
+    public static bool sendLocation(long locationId, PragmataLocationType locationType) {
+        var absoluteId = locationId | (long)locationType;
+        return sendLocation(absoluteId);
+    }
+    private static bool sendLocation(long locationId) {
+        //if (!local_checked_locations.Add(locationId)) return false;
+        local_locations_updated = true;
+        lock (clientLock) {
+            if (isConnected) {
+                API.LogInfo(currentSession!.Locations.GetLocationNameFromId(locationId) ?? $"Location: {locationId}");
+            }
+        }
+        return true;
     }
 
     [Callback(typeof(UpdateBehavior), CallbackType.Pre)]

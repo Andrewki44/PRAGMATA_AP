@@ -1,4 +1,6 @@
-﻿using REFrameworkNET;
+﻿using PRAGMATA.AP;
+using PRAGMATA.Data;
+using REFrameworkNET;
 using REFrameworkNET.Attributes;
 using System;
 
@@ -71,6 +73,43 @@ namespace PRAGMATA {
             return PreHookResult.Continue;
         }
 
+        //[MethodHook(typeof(app.MenuManager), nameof(app.MenuManager.enterMenu), MethodHookType.Pre)]
+        public static PreHookResult PreEnterMenu(Span<ulong> args) {
+            uint menuID = (uint)args[2];
+            uint menuID2 = (uint)args[3];
+
+            if (menuID == 2433465066 && menuID2 == 840074355) {
+                if (!Client.isConnected) {
+                    app.MenuManager menuManager = ManagedObject.ToManagedObject(args[1]).As<app.MenuManager>();
+                    //menuManager.leaveMenu(2433465066, 840074355);
+
+                    return PreHookResult.Skip;
+                }
+            }
+            return PreHookResult.Continue;
+        }
+
+        //[MethodHook(typeof(app.MenuManager), nameof(app.MenuManager.registerMenu), MethodHookType.Pre)]
+        public static PreHookResult PreRegisterMenu(Span<ulong> args) {
+            uint menuID = (uint)args[2];
+            uint menuID2 = (uint)args[3];
+
+            if (menuID == 2433465066 && menuID2 == 840074355) {
+                if (!Client.isConnected) {
+                    app.MenuManager menuManager = ManagedObject.ToManagedObject(args[1]).As<app.MenuManager>();
+                    //menuManager.leaveMenu(2433465066, 840074355);
+
+                    return PreHookResult.Skip;
+                }
+            }
+            return PreHookResult.Continue;
+        }
+
+        /// <summary>
+        /// Lunafilament Chest Open Trigger
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         [MethodHook(typeof(app.sm72_035_10PropDriver), nameof(app.sm72_035_10PropDriver.onTriggerProcessEvent), MethodHookType.Pre)]
         public static PreHookResult PreOnFilamentContainerProcessEvent(Span<ulong> args) {
             app.sm72_035_10PropDriver sm72 = ManagedObject.ToManagedObject(args[1]).As<app.sm72_035_10PropDriver>();
@@ -83,6 +122,28 @@ namespace PRAGMATA {
             return PreHookResult.Continue;
         }
 
+        /// <summary>
+        /// Aquire Perk Trigger
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        [MethodHook(typeof(app.InventoryManager), nameof(app.InventoryManager.acquirePerk), MethodHookType.Pre)]
+        public static PreHookResult PreOnAcquirePerk(Span<ulong> args) {
+            app.PerkItemInfo perk = ManagedObject.ToManagedObject(args[2]).As<app.PerkItemInfo>();
+
+            if (PragmataLocationData.modLocationDict.TryGetValue(perk.PerkID, out var location)) {
+                API.LogInfo($"Sending Location for Perk ID: {perk.PerkID} || {location.Item2}");
+                Client.sendLocation(location.Item1, PragmataLocationData.PragmataLocationType.Mod);
+            }
+
+            return PreHookResult.Skip;
+        }
+
+        /// <summary>
+        /// Catchall for Container Objects
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         [MethodHook(typeof(app.DropItemContainerObject), nameof(app.DropItemContainerObject.acquireItems), MethodHookType.Pre)]
         public static PreHookResult PreOnContainerAcquireItem(Span<ulong> args) {
             app.DropItemContainerObject container = ManagedObject.ToManagedObject(args[1]).As<app.DropItemContainerObject>();
@@ -95,6 +156,16 @@ namespace PRAGMATA {
                 API.LogInfo($"~~ Upgrade Material Picked Up ~~");
                 API.LogInfo($"X: {containerPos.x} || Y: {containerPos.y} || Z: {containerPos.z}");
             }
+
+            return PreHookResult.Continue;
+        }
+
+        [MethodHook(typeof(app.ItemManager), nameof(app.ItemManager.acquired), MethodHookType.Pre)]
+        public static PreHookResult PreOnItemAcquired(Span<ulong> args) {
+            uint itemID1 = (uint)args[2];
+            uint itemID2 = (uint)args[3];
+
+            API.LogInfo($"ItemID1: {itemID1} || ItemID2: {itemID2}");
 
             return PreHookResult.Continue;
         }
