@@ -18,14 +18,15 @@ using static PRAGMATA.Data.PragmataLocationData;
 namespace PRAGMATA.AP;
 
 public static partial class Client {
-    public  static Lock                clientLock = new();
-    public  static ArchipelagoSession? currentSession;
-    public  static string?             currentServer;
-    public  static int                 receivedItems = 0;
-    public  static bool                local_locations_updated = false;
-    public  static bool                remote_locations_updated = false;
-    public  static string?             seedID = null;
-    private static bool                _isDisconnecting = false;
+    public  static Lock                     clientLock = new();
+    public  static ArchipelagoSession?      currentSession;
+    public  static string?                  currentServer;
+    public  static int                      receivedItems = 0;
+    public  static readonly HashSet<long>   local_checked_locations = [];
+    public  static bool                     local_locations_updated = false;
+    public  static bool                     remote_locations_updated = false;
+    public  static string?                  seedID = null;
+    private static bool                     _isDisconnecting = false;
 
     public static PlayerInfo? activePlayer => currentSession?.Players.ActivePlayer;
     public static bool isConnected => currentSession != null;
@@ -159,7 +160,7 @@ public static partial class Client {
         return sendLocation(absoluteId);
     }
     private static bool sendLocation(long locationId) {
-        //if (!local_checked_locations.Add(locationId)) return false;
+        if (!local_checked_locations.Add(locationId)) return false;
         local_locations_updated = true;
         lock (clientLock) {
             if (isConnected) {
@@ -188,6 +189,27 @@ public static partial class Client {
                     receivedItems++;
                 }
             }
+
+            if (local_locations_updated) {
+                var local_only = local_checked_locations.Except(currentSession.Locations.AllLocationsChecked);
+                if (local_only.Any()) {
+                    currentSession.Locations.CompleteLocationChecksAsync(local_only.ToArray());
+                    API.LogInfo($"Sent: {string.Join(",", local_only)}");
+                }
+                local_locations_updated = false;
+            }
+
+            //if (remote_locations_updated) {
+            //    var remote_only = currentSession.Locations.AllLocationsChecked.Except(local_checked_locations);
+            //    foreach (long location in remote_only) {
+            //        if (ArchipelagoFFXModule.item_locations.location_to_item((int)location, out var item)) {
+            //            API.LogInfo($"Synced remote location: location:{location}, item:{item.name}, player:{item.player}");
+            //            Plugin.ObtainItem(item.id);
+            //        }
+            //    }
+            //    local_checked_locations.UnionWith(remote_only);
+            //    remote_locations_updated = false;
+            //}
         }
     }
 }

@@ -1,6 +1,9 @@
-﻿using REFrameworkNET;
+﻿using PRAGMATA.AP;
+using PRAGMATA.Data;
+using REFrameworkNET;
 using REFrameworkNET.Attributes;
 using System;
+using System.Numerics;
 
 namespace PRAGMATA {
     public partial class Plugin {
@@ -147,11 +150,15 @@ namespace PRAGMATA {
             app.DropItemContainerObject container = ManagedObject.ToManagedObject(args[1]).As<app.DropItemContainerObject>();
 
             if (container._ContainerHandle._Item.ItemID == 0x764F029F) {
-                via.GameObject containerObj = container.GameObject;
-                via.vec3 containerPos = containerObj.Transform.Position;
+                Vector3 containerPos = ConvertVec3(container.GameObject.Transform.Position);
 
                 API.LogInfo($"~~ Upgrade Material Picked Up ~~");
-                API.LogInfo($"X: {Math.Round(containerPos.x, 2)} || Y: {Math.Round(containerPos.y, 2)} || Z: {Math.Round(containerPos.z, 2)}");
+                API.LogInfo($"X: {containerPos.X} || Y: {containerPos.Y} || Z: {containerPos.Z}");
+
+                if (PragmataLocationData.componentLocationDict.TryGetValue(containerPos, out long componentLocationId)) {
+                    Client.sendLocation(componentLocationId, PragmataLocationData.PragmataLocationType.Component);
+                    return PreHookResult.Skip;
+                }
             }
 
             return PreHookResult.Continue;
@@ -170,12 +177,18 @@ namespace PRAGMATA {
         [MethodHook(typeof(app.TreasureBoxPropDriver), nameof(app.TreasureBoxPropDriver.onItemDropEvent), MethodHookType.Pre)]
         public static PreHookResult PreOnItemDropEvent(Span<ulong> args) {
             app.TreasureBoxPropDriver treasureBox = ManagedObject.ToManagedObject(args[1]).As<app.TreasureBoxPropDriver>();
+            string treasureType = treasureBox.GameObject.Name;
             //app.AcquisitionItemInfo boxItemInfo = treasureBox._TreasureData._Item.AcquisitionItemInfo;
-            via.vec3 boxPos= treasureBox.GameObject.Transform.Position;
+            Vector3 boxPos = ConvertVec3(treasureBox.GameObject.Transform.Position);
 
             API.LogInfo("~~ Treasure Box Opened ~~");
-            API.LogInfo($"Type: {treasureBox.GameObject.Name}");
-            API.LogInfo($"Box Position || X= {Math.Round(boxPos.x, 2)}, Y= {Math.Round(boxPos.y, 2)}, Z= {Math.Round(boxPos.z, 2)}");
+            API.LogInfo($"Type: {treasureType}");
+            API.LogInfo($"Box Position || X= {boxPos.X}, Y= {boxPos.Y}, Z= {boxPos.Z}");
+
+            if (PragmataLocationData.treasureBoxLocationDict.TryGetValue(boxPos, out long treasureBoxLocationId)) {
+                Client.sendLocation(treasureBoxLocationId, PragmataLocationData.PragmataLocationType.TreasureBox);
+                return PreHookResult.Skip;
+            }
 
             return PreHookResult.Continue;
         }

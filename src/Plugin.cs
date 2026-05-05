@@ -3,6 +3,7 @@ using PRAGMATA.AP;
 using PRAGMATA.Data;
 using REFrameworkNET;
 using REFrameworkNET.Attributes;
+using System;
 using System.Numerics;
 using System.Reflection;
 
@@ -125,6 +126,7 @@ public partial class Plugin {
 
     public static void ObtainItem(uint itemId, uint amount = 1) {
         if (itemId == 0) return;
+        API.LogInfo($"~~ Attempting to obtain item: {itemId} ~~");
 
         var itemType = (itemId & 0xF000) >> 12;
         //if (amount == -1) amount = (int)((itemId & 0xFF0000) >> 16);
@@ -136,7 +138,7 @@ public partial class Plugin {
         switch (itemType) {
             case 0x0:   // Escape Hatches & Missions
                 break;
-            case 0x1:
+            case 0x1:   // Weapon
                 if (PragmataItemData.weaponItemDict.TryGetValue(itemId, out uint weaponId)) {
                     ManagedObject weaponObj = app.WeaponItemInfo.REFType.CreateInstance(1);
                     weaponObj.Call(".ctor(System.UInt32, System.Int32)", [weaponId, amount]);
@@ -163,13 +165,21 @@ public partial class Plugin {
                     inventoryManager.acquireItem(item, null);
                 }
                 break;
+            case 0x7:   // Mod Items
+                if (PragmataItemData.modItemDict.TryGetValue(itemId, out uint modId)) {
+                    ManagedObject obj = app.PerkItemInfo.REFType.CreateInstance(1);
+                    obj.Call(".ctor(System.UInt32, System.UInt32, System.Int32)", [0x25860F89, modId, amount]);
+                    app.PerkItemInfo item = obj.As<app.PerkItemInfo>();
+
+                    inventoryManager.acquirePerk(item, null);
+                }
+                break;
             case 0xA:
                 if (PragmataItemData.upgradeItemDict.TryGetValue(itemId, out uint upgradeId)) {
                     ManagedObject obj = app.AcquisitionItemInfo.REFType.CreateInstance(1);
                     obj.Call(".ctor(System.UInt32, System.Int32)", [upgradeId, amount]);
                     app.AcquisitionItemInfo item = obj.As<app.AcquisitionItemInfo>();
 
-                    //inventoryManager.acquireItem(item, null);
                     inventoryManager.acquireItem(item, null);
                 }
                 break;
@@ -184,6 +194,10 @@ public partial class Plugin {
             return true;
         else
             return false;
+    }
+
+    public static Vector3 ConvertVec3(via.vec3 vec3) {
+        return new Vector3((float)Math.Round(vec3.x, 2), (float)Math.Round(vec3.y, 2), (float)Math.Round(vec3.z, 2));
     }
 
     [PluginExitPoint]
